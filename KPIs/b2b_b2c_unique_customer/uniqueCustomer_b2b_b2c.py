@@ -38,6 +38,8 @@ def unique_customer_b2b_b2c(df):
         df[tags_column] = df[tags_column].apply(
             lambda x: 'b2b' if pd.notnull(x) and b2b_pattern.search(x) else ('b2c' if pd.notnull(x) else None))
 
+        # df.to_excel("Test.xlsx", index=False)
+
         # Split the dataframe into B2B and B2C based on the tags
         b2b_customers = df[df[tags_column] == 'b2b'][email_column]
         b2c_customers = df[df[tags_column] == 'b2c'][email_column]

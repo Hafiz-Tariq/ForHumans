@@ -54,7 +54,7 @@ with left_column:
         tmp_file.close()
 
         # Download link for processed data
-        st.download_button(label="Download Processed Data",
+        st.download_button(label="Download Processed KPI's: ",
                            data=tmp_file.name,
                            file_name="processed_data.csv",
                            mime="text/csv",
@@ -62,6 +62,6 @@ with left_column:
 
 # Right column for displaying the processed file
 with right_column:
-    st.subheader("Processed Data")
+    st.subheader("Processed KPI's: ")
     if 'processed_data' in locals():
         st.dataframe(processed_data)  # Display the processed data
