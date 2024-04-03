@@ -24,7 +24,7 @@ def count_total_orders(df):
             return None
 
         # Count the total number of non-null values in the 'Name' column
-        total_orders = df[column_name].dropna().count()
+        total_orders = df[column_name].dropna().nunique()
         return total_orders
 
     except KeyError as e:

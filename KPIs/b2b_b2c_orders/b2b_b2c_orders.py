@@ -37,8 +37,8 @@ def categorize_tags_and_count_orders(df):
         )
 
         # Count total orders for each category
-        total_b2b_orders = df[df[tags_column] == 'B2B'][name_column].size
-        total_b2c_orders = df[df[tags_column] == 'B2C'][name_column].size
+        total_b2b_orders = df[df[tags_column] == 'B2B'][name_column].nunique()
+        total_b2c_orders = df[df[tags_column] == 'B2C'][name_column].nunique()
 
         # Return the counts of total orders for 'B2B' and 'B2C'
         return total_b2b_orders, total_b2c_orders
