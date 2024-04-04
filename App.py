@@ -6,11 +6,13 @@ from tempfile import NamedTemporaryFile
 # Set wide mode layout
 st.set_page_config(page_title="ForHumans Data Drill", layout="wide")
 
+
 # Function to check if the uploaded file is valid
 def is_valid_file(uploaded_file):
     if uploaded_file is not None and (uploaded_file.name.endswith('.csv') or uploaded_file.name.endswith('.xlsx')):
         return True
     return False
+
 
 # Function to save the processed file, placeholder for the user to complete
 def process_files(file1, file2):
@@ -18,6 +20,7 @@ def process_files(file1, file2):
     # Replace with actual processing code
     processed_data = pd.DataFrame()  # Dummy dataframe, replace with actual processed data
     return processed_data
+
 
 # Heading
 st.title("ForHumans Data Drill")

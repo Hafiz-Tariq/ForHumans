@@ -24,11 +24,11 @@ def main():
         # ************************
 
         # 1- Total Unique Customer
-        totalCustomer = total_unique_customer(orders)
-        if totalCustomer is None:
+        total_customer = total_unique_customer(orders)
+        if total_customer is None:
             print("There is an issue calculating Total Customer!")
             exit()
-        # print("Total Unique Customer: ", totalCustomer)
+        # print("Total Unique Customer: ", total_customer)
         # ************************
 
         # 2,3- Unique B2B & B2C Customers
@@ -41,11 +41,11 @@ def main():
         # ************************
 
         # 4- Total Orders
-        totalOrders = count_total_orders(orders)
-        if totalOrders is None:
+        total_orders = count_total_orders(orders)
+        if total_orders is None:
             print("There is an issue calculating Total Orders!")
             exit()
-        # print("Total Number of Orders: ", totalOrders)
+        # print("Total Number of Orders: ", total_orders)
         # ************************
 
         # 5, 6- Total B2B and B2C Orders
@@ -77,7 +77,7 @@ def main():
         # ************************
 
         # 13, 14, 15- Average Basket, Average B2B Basket & B2C Basket
-        print("Total Basket: ", round(total_revenue / totalOrders, 2))
+        print("Total Basket: ", round(total_revenue / total_orders, 2))
         print("Total B2B Basket: ", round(b2b_revenue / b2b_order, 2))
         print("Total B2C Basket: ", round(b2c_revenue / b2c_order, 2))
         # ************************
