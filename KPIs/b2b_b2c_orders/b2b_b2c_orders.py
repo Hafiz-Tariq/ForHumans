@@ -1,51 +1,51 @@
 import pandas as pd
-import re
 
 
 def categorize_tags_and_count_orders(df):
     """
-    Group by the 'Name' column and update 'Tags' by combining 'b2b' and 'Sample' as 'B2B',
-    and everything else as 'B2C'. It then counts the total orders for 'B2B' and 'B2C',
-    without focusing on uniqueness but rather the size of each category.
+    This function counts the total B2B and B2C orders based on unique entries in the 'Name' column.
+    It checks how many of these unique names have associated non-null entries in 'B2B' and 'B2C' columns.
 
     Args:
-        df (pandas.DataFrame): The dataframe containing the Shopify orders data.
+        df (pandas.DataFrame): The dataframe containing the data.
 
     Returns:
-        dict: A dictionary containing the counts of total orders for 'B2B' (including 'Sample') and 'B2C'.
+        tuple: A tuple containing the count of B2B orders and B2C orders associated with unique names.
 
     Raises:
-        KeyError: If the specified columns do not exist in the dataframe.
+        KeyError: If the 'Name', 'B2B', or 'B2C' columns do not exist in the dataframe.
         Exception: For handling unexpected errors that may occur during the function execution.
     """
     try:
         name_column = 'Name'
-        tags_column = 'Tags'
-        # Ensure the required columns exist in the DataFrame
-        if name_column not in df.columns or tags_column not in df.columns:
-            raise KeyError(f"One or both columns '{name_column}' and '{tags_column}' do not exist in the DataFrame.")
+        b2b_column = 'B2B'
+        b2c_column = 'B2C'
 
-        # Initialize the regular expression pattern for B2B tags
-        b2b_pattern = re.compile(r'\b(b2b|Sample)\b', re.IGNORECASE)
+        # Check if the required columns exist in the DataFrame
+        if any(col not in df.columns for col in [name_column, b2b_column, b2c_column]):
+            raise KeyError(f"One or more required columns do not exist in the DataFrame.")
 
-        # Group by 'Name' and apply logic to 'Tags' for forward and backward filling
-        grouped = df.groupby(name_column)[tags_column].transform(lambda x: x.bfill().ffill())
+        # Create a grouped DataFrame based on unique 'Name'
+        grouped_data = df.drop_duplicates(subset=[name_column])
 
-        # Update df with the new tags, standardizing to 'B2B' if it contains 'b2b' or 'Sample'
-        df[tags_column] = grouped.apply(
-            lambda x: 'B2B' if pd.notnull(x) and b2b_pattern.search(x) else ('B2C' if pd.notnull(x) else None)
-        )
+        # Count the B2B and B2C orders
+        total_b2b_orders = grouped_data[b2b_column].notna().sum()
+        total_b2c_orders = grouped_data[b2c_column].notna().sum()
 
-        # Count total orders for each category
-        total_b2b_orders = df[df[tags_column] == 'B2B'][name_column].nunique()
-        total_b2c_orders = df[df[tags_column] == 'B2C'][name_column].nunique()
-
-        # Return the counts of total orders for 'B2B' and 'B2C'
         return total_b2b_orders, total_b2c_orders
 
     except KeyError as e:
+        # Handle the case where the specified columns are not found in the dataframe
         print(f"KeyError: {e}")
-        return None
+        return None, None
     except Exception as e:
+        # Handle any other exceptions that may occur
         print(f"Exception: {e}")
-        return None
+        return None, None
+
+# Usage example:
+# Ensure you load your DataFrame as 'df' before using this function
+# df = pd.read_excel('your_data_file.xlsx')
+# total_b2b, total_b2c = count_unique_b2b_b2c_orders(df)
+# print("Total B2B Orders:", total_b2b)
+# print("Total B2C Orders:", total_b2c)
