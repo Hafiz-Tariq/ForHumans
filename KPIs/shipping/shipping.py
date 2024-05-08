@@ -14,7 +14,7 @@ def sum_shipping(dataframe):
     try:
         # Ensure the 'Shipping' column exists
         if 'Shipping' not in dataframe.columns:
-            raise ValueError("The dataframe does not contain a 'Shipping' column.")
+            return None
 
         # Calculate the sum of the 'Shipping' column
         shipping_sum = dataframe['Shipping'].sum()

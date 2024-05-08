@@ -19,7 +19,7 @@ def analyze_discounts_and_names(df):
         # Ensure required columns are present
         required_columns = ['Discount Code', 'Discount Amount', 'Name']
         if not all(column in df.columns for column in required_columns):
-            raise KeyError("Missing one or more required columns: 'Discount Code', 'Discount Amount', 'Name'")
+            return None
 
         # Step 1: Filter out rows with NaN in 'Discount Code' and codes with exactly 6 or 7 digits
         filtered_df = df.dropna(subset=['Discount Code'])
@@ -34,7 +34,7 @@ def analyze_discounts_and_names(df):
         return round(total_discount_amount / unique_names_count, 2)
 
     except KeyError as e:
-        print(f"Error: {str(e)}")
+        # print(f"Error: {str(e)}")
         return None
 
 # Example usage:

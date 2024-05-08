@@ -1,3 +1,4 @@
+
 def summarize_transactions(df):
     """
     Summarize transaction counts, B2B/B2C counts, and calculate percentages of total transactions
@@ -44,20 +45,40 @@ def summarize_transactions(df):
             summary['percentages'][method] = round(
                 (payment_count / total_transactions * 100) if total_transactions else 0, 2)
 
-        return summary
+        allPaymentMethod = []
+        b2bPaymentMethod = []
+        b2cPaymentMethod = []
+        totalPercentagePaymentMethod = []
+        for method, count in summary['payment_counts'].items():
+            # print(f"{method}: {count}")
+            allPaymentMethod.append(count)
+        # print(allPaymentMethod)
+
+        for method, count in summary['b2b_counts'].items():
+            # print(f"{method}: {count}")
+            b2bPaymentMethod.append(count)
+        # print(b2bPaymentMethod)
+
+        for method, count in summary['b2c_counts'].items():
+            # print(f"{method}: {count}")
+            b2cPaymentMethod.append(count)
+        # print(b2cPaymentMethod)
+
+        for method, count in summary['percentages'].items():
+            # print(f"{method}: {count}%")
+            totalPercentagePaymentMethod.append(count)
+        # print(totalPercentagePaymentMethod)
+
+        return (allPaymentMethod[0], allPaymentMethod[1], allPaymentMethod[2], b2bPaymentMethod[0], b2bPaymentMethod[1],
+                b2bPaymentMethod[2], b2cPaymentMethod[0], b2cPaymentMethod[1], b2cPaymentMethod[2],
+                totalPercentagePaymentMethod[0], totalPercentagePaymentMethod[1], totalPercentagePaymentMethod[2])
+
     except KeyError as e:
         # Handle missing columns
-        raise KeyError(f"Error with DataFrame structure: {str(e)}")
+        return None
     except TypeError as e:
         # Handle incorrect types in DataFrame calculations
-        raise ValueError(f"Type error in calculations: {str(e)}")
+        return None
     except Exception as e:
         # Handle any other unexpected errors
-        raise Exception(f"An unexpected error occurred: {str(e)}")
-
-# Example usage:
-# try:
-#     result = summarize_transactions(data)
-#     print(result)
-# except Exception as e:
-#     print(f"Failed to summarize transactions: {e}")
+        return None

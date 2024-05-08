@@ -1,79 +1,92 @@
 import streamlit as st
-from main import main
 import pandas as pd
+from PIL import Image
+# import base64
+from io import BytesIO
+from main import main, cohorts, sku_update
+from DataProcessing.processing import processing_files
 
 # Set wide mode layout
 st.set_page_config(page_title="ForHumans Data Drill", layout="wide")
 
-# Initialize session state variables
-if 'order' not in st.session_state:
-    st.session_state['order'] = None
-if 'return' not in st.session_state:
-    st.session_state['return'] = None
-if 'processed_data' not in st.session_state:
-    st.session_state['processed_data'] = None
+# Function to convert a matplotlib figure to a PIL Image
+def fig_to_image(fig):
+    """Convert a matplotlib figure to a PIL Image."""
+    buf = BytesIO()
+    fig.savefig(buf, format='png')  # Adjust format if needed
+    buf.seek(0)
+    return Image.open(buf)
 
+# Function to convert image to bytes for download
+def get_image_bytes(img, format='PNG'):
+    buffered = BytesIO()
+    img.save(buffered, format=format)
+    return buffered.getvalue()
 
 # Function to convert uploaded file to DataFrame
 def convert_to_dataframe(uploaded_file):
-    if uploaded_file.name.endswith('.csv'):
-        return pd.read_csv(uploaded_file)
-    elif uploaded_file.name.endswith('.xlsx'):
-        return pd.read_excel(uploaded_file)
-    else:
-        st.error("Unsupported file format!")
-        return None
+    try:
+        if uploaded_file.name.endswith('.csv'):
+            return pd.read_csv(uploaded_file)
+        elif uploaded_file.name.endswith('.xlsx'):
+            return pd.read_excel(uploaded_file)
+    except Exception as e:
+        st.error(f"Error reading file: {e}")
+    return None
 
-
-# Heading
-st.title("ForHumans Data Drill")
-
-# Use columns to create a side-by-side layout
-left_column, right_column = st.columns(2)
-
-# Left column for controls and messages
-with left_column:
+# File upload section
+with st.sidebar:
     st.subheader("File Upload")
+    uploaded_file1 = st.file_uploader("Step 1: Upload Orders file (.csv or .xlsx)", type=['csv', 'xlsx'], key='uploader1')
+    uploaded_file2 = st.file_uploader("Step 2: Upload Return file (.csv or .xlsx)", type=['csv', 'xlsx'], key='uploader2')
+    uploaded_file3 = st.file_uploader("Step 3: Upload SKU file (.csv or .xlsx)", type=['csv', 'xlsx'], key='uploader3')
 
-    # File uploader for the Orders file
-    uploaded_file1 = st.file_uploader("Step 1: Upload Orders file (.csv or .xlsx)",
-                                      type=['csv', 'xlsx'], key='uploader1')
-    if uploaded_file1 is not None:
-        df_orders = convert_to_dataframe(uploaded_file1)
-        if df_orders is not None:
-            st.session_state['order'] = df_orders
-            st.success("Orders file uploaded and converted successfully!")
-
-    # File uploader for the Return file
-    uploaded_file2 = st.file_uploader("Step 2: Upload Return file (.csv or .xlsx)",
-                                      type=['csv', 'xlsx'], key='uploader2')
-    if uploaded_file2 is not None:
-        df_returns = convert_to_dataframe(uploaded_file2)
-        if df_returns is not None:
-            st.session_state['return'] = df_returns
-            st.success("Return file uploaded and converted successfully!")
-
-    # Drill Data button
     if st.button("Drill Data"):
-        if st.session_state['order'] is not None and st.session_state['return'] is not None:
-            kpis = main(st.session_state['order'], st.session_state['return'])
-            if not kpis.empty:
-                st.session_state['processed_data'] = kpis
-                st.success("Data processed successfully!")
+        if uploaded_file1 and uploaded_file2 and uploaded_file3:
+            orders = convert_to_dataframe(uploaded_file1)
+            returns = convert_to_dataframe(uploaded_file2)
+            sku = convert_to_dataframe(uploaded_file3)
+
+            if orders is not None and returns is not None and sku is not None:
+                clean_orders, clean_returns, base_return = processing_files(orders, returns)
+                df1, df2 = main(clean_orders, clean_returns, base_return)
+                df3 = sku_update(clean_orders, clean_returns, sku)
+                figures = cohorts(clean_orders)
+
+                # Convert the figures to PIL Images
+                st.session_state['df1'], st.session_state['df2'], st.session_state['df3'] = df1, df2, df3
+                st.session_state['img1'], st.session_state['img2'], st.session_state['img3'] = fig_to_image(figures['Overall']), fig_to_image(figures['B2B']), fig_to_image(figures['B2C'])
             else:
-                st.error("Processing is not successful!")
+                st.error("One or more files could not be processed. Please check the file formats and contents.")
         else:
-            st.error("Please upload both files before drilling data.")
+            st.error("Please upload all required files before drilling data.")
 
-# Right column for displaying the processed file and download link
-with right_column:
-    st.subheader("Processed KPI's:")
-    if st.session_state['processed_data'] is not None:
-        st.dataframe(st.session_state['processed_data'])  # Display the processed data
+# Display DataFrames and images
+col1, col2, col3 = st.columns(3)
 
-        # Generate a CSV download link
-        csv = st.session_state['processed_data'].to_csv(index=False).encode('utf-8')
-        st.download_button(label="Download Processed KPI's",
-                           data=csv,
-                           file_name="processed_data.csv",
-                           mime="text/csv")
+with col1:
+    if 'df1' in st.session_state and st.session_state['df1'] is not None:
+        st.dataframe(st.session_state['df1'])
+        st.download_button("Download DataFrame 1", st.session_state['df1'].to_csv(index=False), "df1.csv", "text/csv")
+    if 'img1' in st.session_state and st.session_state['img1'] is not None:
+        st.image(st.session_state['img1'], caption='Overall Cohort')
+        img_bytes = get_image_bytes(st.session_state['img1'])
+        st.download_button("Download Image 1", img_bytes, "cohort_overall.png", "image/png")
+
+with col2:
+    if 'df2' in st.session_state and st.session_state['df2'] is not None:
+        st.dataframe(st.session_state['df2'])
+        st.download_button("Download DataFrame 2", st.session_state['df2'].to_csv(index=False), "df2.csv", "text/csv")
+    if 'img2' in st.session_state and st.session_state['img2'] is not None:
+        st.image(st.session_state['img2'], caption='B2B Cohort')
+        img_bytes = get_image_bytes(st.session_state['img2'])
+        st.download_button("Download Image 2", img_bytes, "cohort_b2b.png", "image/png")
+
+with col3:
+    if 'df3' in st.session_state and st.session_state['df3'] is not None:
+        st.dataframe(st.session_state['df3'])
+        st.download_button("Download DataFrame 3", st.session_state['df3'].to_csv(index=False), "df3.csv", "text/csv")
+    if 'img3' in st.session_state and st.session_state['img3'] is not None:
+        st.image(st.session_state['img3'], caption='B2C Cohort')
+        img_bytes = get_image_bytes(st.session_state['img3'])
+        st.download_button("Download Image 3", img_bytes, "cohort_b2c.png", "image/png")

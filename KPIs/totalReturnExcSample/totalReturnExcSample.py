@@ -35,7 +35,7 @@ def process_dataframes(returns_df, test_df):
         return final_df['ID'].nunique()
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        # print(f"An error occurred: {e}")
         return None
 
 # Example usage:

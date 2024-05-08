@@ -15,7 +15,7 @@ def sum_subtotal(dataframe):
     try:
         # Ensure the 'Subtotal' column exists
         if 'Subtotal' not in dataframe.columns:
-            raise ValueError("The dataframe does not contain a 'Subtotal' column.")
+            return None
 
         # Calculate the sum of the 'Subtotal' column
         subtotal_sum = dataframe['Subtotal'].sum()

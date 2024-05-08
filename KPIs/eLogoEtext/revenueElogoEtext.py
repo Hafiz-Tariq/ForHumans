@@ -1,4 +1,3 @@
-
 def calculate_sku_costs(dataframe):
     """
     Calculates the total costs for 'E-Text' and 'E-Logo' items in the 'Lineitem sku' column
@@ -20,16 +19,19 @@ def calculate_sku_costs(dataframe):
             missing = required_columns - set(dataframe.columns)
             raise ValueError(f"The DataFrame is missing the following required columns: {missing}")
 
-        # Clean the 'Lineitem sku' column to handle NaN values
-        dataframe['Lineitem sku'] = dataframe['Lineitem sku'].fillna('')
+        # Copy the DataFrame to avoid SettingWithCopyWarning
+        df_copy = dataframe.copy()
+
+        # Clean the 'Lineitem sku' column to handle NaN values using .loc
+        df_copy.loc[:, 'Lineitem sku'] = df_copy['Lineitem sku'].fillna('')
 
         # Filter rows for 'E-Text' and 'E-Logo'
-        e_text_filter = dataframe['Lineitem sku'].str.contains('E-Text')
-        e_logo_filter = dataframe['Lineitem sku'].str.contains('E-Logo')
+        e_text_filter = df_copy['Lineitem sku'].str.contains('E-Text')
+        e_logo_filter = df_copy['Lineitem sku'].str.contains('E-Logo')
 
         # Calculate costs
-        e_text_cost = (dataframe.loc[e_text_filter, 'Lineitem quantity'] * 8).sum()
-        e_logo_cost = (dataframe.loc[e_logo_filter, 'Lineitem quantity'] * 15).sum()
+        e_text_cost = (df_copy.loc[e_text_filter, 'Lineitem quantity'] * 8).sum()
+        e_logo_cost = (df_copy.loc[e_logo_filter, 'Lineitem quantity'] * 15).sum()
 
         return e_text_cost, e_logo_cost
 

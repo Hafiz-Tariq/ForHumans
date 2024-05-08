@@ -42,7 +42,7 @@ def calculate_time_differences(return_data, order_data):
         avg_days = merged_data['Days Difference'].mean()
         avg_months = merged_data['Months Difference'].mean()
 
-        return avg_days, avg_months
+        return round(avg_days, 2), round(avg_months, 2)
 
     except Exception as e:
         print("An error occurred:", e)

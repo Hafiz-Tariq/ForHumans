@@ -15,7 +15,7 @@ def analyze_rejected_shipments(data):
     try:
         # Ensure 'Return type' and 'ID' columns are present
         if 'Return type' not in data.columns or 'ID' not in data.columns:
-            raise ValueError("Dataframe must contain 'Return type' and 'ID' columns")
+            return None, None
 
         # Calculate total unique IDs for percentage calculation
         total_unique_ids = data['ID'].nunique()
@@ -26,11 +26,11 @@ def analyze_rejected_shipments(data):
 
         # Calculate percentage of rejected shipments
         if total_unique_ids == 0:
-            raise ValueError("No unique IDs found in the input data.")
+            return None, None
 
         percentage_rejected = (unique_rejected_ids / total_unique_ids) * 100
 
-        return unique_rejected_ids, percentage_rejected
+        return unique_rejected_ids, round(percentage_rejected, 2)
 
     except Exception as e:
         print("An error occurred:", e)
