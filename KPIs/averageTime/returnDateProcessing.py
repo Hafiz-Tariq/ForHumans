@@ -18,7 +18,7 @@ def process_reception_dates(dataframe):
     """
     try:
         # Convert 'Reception date' to datetime and format to date only
-        dataframe['Reception date'] = pd.to_datetime(dataframe['Reception date'], format='%d-%m-%y %H:%M').dt.date
+        dataframe['Reception date'] = pd.to_datetime(dataframe['Reception date']).dt.date
         return dataframe
     except KeyError:
         return None

@@ -1,13 +1,13 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
-# import base64
 from io import BytesIO
 from main import main, cohorts, sku_update
 from DataProcessing.processing import processing_files
 
 # Set wide mode layout
 st.set_page_config(page_title="ForHumans Data Drill", layout="wide")
+
 
 # Function to convert a matplotlib figure to a PIL Image
 def fig_to_image(fig):
@@ -17,22 +17,47 @@ def fig_to_image(fig):
     buf.seek(0)
     return Image.open(buf)
 
+
 # Function to convert image to bytes for download
 def get_image_bytes(img, format='PNG'):
     buffered = BytesIO()
     img.save(buffered, format=format)
     return buffered.getvalue()
 
+
 # Function to convert uploaded file to DataFrame
 def convert_to_dataframe(uploaded_file):
     try:
         if uploaded_file.name.endswith('.csv'):
-            return pd.read_csv(uploaded_file)
+            try:
+                # Try reading the file with the default delimiter
+                df = pd.read_csv(uploaded_file)
+                if df.shape[1] == 1:  # Check if all data is in a single column
+                    raise ValueError("Single column detected, trying semicolon delimiter.")
+                return df
+            except Exception as e:
+                # st.warning(f"Error reading CSV file with default delimiter: {e}. Trying semicolon delimiter.")
+                try:
+                    # Reset the buffer's position to the beginning
+                    uploaded_file.seek(0)
+                    df = pd.read_csv(uploaded_file, delimiter=';')
+                    if df.shape[1] == 1:  # Check if all data is in a single column
+                        raise ValueError("Single column detected with semicolon delimiter.")
+                    return df
+                except Exception as e:
+                    st.error(f"Error reading CSV file with semicolon delimiter: {e}.")
         elif uploaded_file.name.endswith('.xlsx'):
             return pd.read_excel(uploaded_file)
     except Exception as e:
         st.error(f"Error reading file: {e}")
     return None
+
+
+def clean_dataframe(df):
+    # Remove columns that are completely empty
+    df_cleaned = df.dropna(axis=1, how='all')
+    return df_cleaned
+
 
 # File upload section
 with st.sidebar:
@@ -44,10 +69,18 @@ with st.sidebar:
     if st.button("Drill Data"):
         if uploaded_file1 and uploaded_file2 and uploaded_file3:
             orders = convert_to_dataframe(uploaded_file1)
+            # print(orders)
             returns = convert_to_dataframe(uploaded_file2)
+            # print(returns)
             sku = convert_to_dataframe(uploaded_file3)
+            # print(sku)
 
             if orders is not None and returns is not None and sku is not None:
+                orders = clean_dataframe(orders)
+                returns = clean_dataframe(returns)
+                sku = clean_dataframe(sku)
+                print(sku)
+
                 clean_orders, clean_returns, base_return = processing_files(orders, returns)
                 df1, df2 = main(clean_orders, clean_returns, base_return)
                 df3 = sku_update(clean_orders, clean_returns, sku)
