@@ -398,9 +398,9 @@ def main(orders, returns, base_return):
         # ************************
 
         # 118- Customer Order via Web or Shopify
-        all_orders_source = source_value_counts(orders)
-        b2b_order_source = source_value_counts(orders[orders['B2B'] == 1])
-        b2c_order_source = source_value_counts(orders[orders['B2C'] == 1])
+        all_orders_source = source_value_counts(orders, "all")
+        b2b_order_source = source_value_counts(orders[orders['B2B'] == 1], "b2b")
+        b2c_order_source = source_value_counts(orders[orders['B2C'] == 1], "b2c")
         if all_orders_source is None or b2b_order_source is None or b2c_order_source is None:
             print("Source Error calculation.")
             exit()
