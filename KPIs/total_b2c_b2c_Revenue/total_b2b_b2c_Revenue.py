@@ -32,7 +32,7 @@ def calculate_revenue_by_category(df):
         # Calculate B2C revenue
         b2c_revenue = df[df[b2c_column].notna()][total_column].sum()
 
-        return total_revenue, b2b_revenue, b2c_revenue
+        return round(total_revenue, 2), round(b2b_revenue, 2), round(b2c_revenue, 2)
 
     except KeyError as e:
         # Handle the case where the specified columns are not found in the dataframe
