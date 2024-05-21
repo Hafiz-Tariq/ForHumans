@@ -4,15 +4,11 @@ from KPIs.Total_Unique_Customers.totaUniqueCustomers import total_unique_custome
 from KPIs.b2b_b2c_unique_customer.uniqueCustomer_b2b_b2c import unique_customer_b2b_b2c
 from KPIs.totalOrders.totalOrders import count_total_orders
 from KPIs.b2b_b2c_orders.b2b_b2c_orders import categorize_tags_and_count_orders
-# from DataProcessing.tagAggregatedColumn import aggregate_tags_in_dataframe
-# from DataProcessing.sampleColumn import mark_tag_matches
-# from DataProcessing.b2bColumn import mark_b2b_matches
-# from DataProcessing.b2cColumn import mark_b2c_matches
 from KPIs.itemsSold.total_b2b_b2c2_items_sold import calculate_items_sold_by_category
 from KPIs.total_b2c_b2c_Revenue.total_b2b_b2c_Revenue import calculate_revenue_by_category
 from KPIs.total_b2c_b2c_Revenue.total_b2b_b2c_Revenue_without_Sample import calculate_revenue_by_category_sample_exc
 from KPIs.totalReturnsItems.totalReturnItemsID import total_return_items
-from KPIs.totalReturn_b2b_sample_pacakge.cleanReturnColumn import clean_order_numbers
+# from KPIs.totalReturn_b2b_sample_pacakge.cleanReturnColumn import clean_order_numbers
 from KPIs.totalReturn_b2b_sample_pacakge.return_b2b_sample_pkg import count_matched_orders
 from KPIs.totalAvgperSample.totalAvgItemPerSamplePkg import calculate_b2b_sample_ratio
 from KPIs.totalReturnExcSample.totalReturnExcSample import process_dataframes
@@ -27,13 +23,10 @@ from KPIs.totalShipmentCost.totalShipmentCost import calculate_total_shipping
 from KPIs.freeShipments.freeShipments import count_free_shipments
 from KPIs.promoReferralOrders.promoReferral import count_discount_codes
 from KPIs.skuFile.skuFile import update_sku_quantities
-# from KPIs.cohorts.prcosseingDate import convert_created_at_to_date
-# from KPIs.cohorts.yearlyCohorts import generate_yearly_cohort_heatmaps
 from KPIs.cohorts.yearlyCohortsDisplay import generate_yearly_cohort_heatmaps_display
 from KPIs.keyPaymentOptions.keyPaymentOptions import summarize_transactions
 from KPIs.totalDiscount.totalDiscount import sum_discount_amount
 from KPIs.newsletterSignUps.newsletterSignUp import count_accepts_marketing
-# from KPIs.averageTime.returnDateProcessing import process_reception_dates
 from KPIs.averageTime.avgMonthDays import calculate_time_differences
 from KPIs.rejectedShipments.rejectedShipments import analyze_rejected_shipments
 from KPIs.returnedProductsSKU.returnedProductsSKU import update_sku_with_returns
@@ -46,6 +39,7 @@ from KPIs.zipCodeCounts.zipCodeCounts import classify_zip_codes
 from KPIs.countryOrder.countryOrder import count_unique_names_by_country
 from KPIs.marketingTags.marketingTags import count_names_with_marketing_tags
 from KPIs.sourceCounts.sourceCounts import source_value_counts
+from KPIs.skuDelta.skuDelta import calculate_delta
 
 # Returns
 from KPIs.totalReturns.totalReturns import total_returns
@@ -442,6 +436,10 @@ def sku_update(orders, returns, sku):
     if sku is None:
         print("Error calculating most product returned.")
         exit()
+
+    sku = calculate_delta(sku)
+    if sku is None:
+        print("Error Calculating SKU.")
 
     return sku
 
